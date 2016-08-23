@@ -1,0 +1,16 @@
+THIS PROJECT ONLY WORKS ON LINUX CURRENTLY. 
+
+TO USE:
+
+    Install SDL2, and GLEW, and make.
+    
+    Navigate to the SDL_Game directory
+    
+    Run "make clean" then run "make". This compiles the program using your system's library headers into a runnable binary called sdlgame.
+    
+    run "./sdlgame"
+    
+    
+    
+
+SDL already includes OpenGL headers if installed correctly.
