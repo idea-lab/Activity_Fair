@@ -3,17 +3,17 @@
 attribute vec3 position;
 attribute vec2 uv;
 
-varying vec2 uvs[11];
+varying vec2 uvs[15];
 
-const float pixelSize = 1.0/240.0;
+const float pixelSize = 1.0/120.0;
 
 
 void main(){
 
     gl_Position = vec4(position, 1.0);
-    for(int i = -5; i < 6; i++){
+    for(int i = -7; i < 8; i++){
     
-        uvs[i+5] = uv + vec2(0.0, pixelSize*i);
+        uvs[i+7] = uv + vec2(0.0, pixelSize*i);
     
     }
 
