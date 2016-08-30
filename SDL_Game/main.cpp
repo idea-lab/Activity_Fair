@@ -12,8 +12,11 @@
 #define GLM_FORCE_RADIANS
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtx/transform.hpp>
-#include <iostream>
 
+#include <iostream>
+#include <ctime>
+#include <functional>
+    
 #include "shader.h"
 #include "mesh.h"
 #include "renderpass.h"
@@ -74,8 +77,13 @@ float p2y;
 float p2vx;
 float p2vy;
 
+int firetime1;
+int firetime2;
+
 const float p2a = 0.05f; 
 const float p2d = 0.97f;
+
+
 
 float p2r;
 
@@ -184,24 +192,25 @@ void doPhysics(){
     
     
     if(keystate[SDL_GetScancodeFromKey(SDLK_DOWN)]){
-        for(int i = 0; i < 5; i++){
+        if(firetime1 > 10 || firetime1 == 0){
+            for(int i = 0; i < 5; i++){
             
-            if(!bullets1[i].isactive){
+                if(!bullets1[i].isactive){
                 //std::cout <<"mepp" <<std::endl;
-                bullets1[i].isactive = true;
-                if(bullets1[i].isactive)
-                //std::cout <<"meeepp" <<std::endl;
-                bullets1[i].x = p1x;
-                bullets1[i].y = p1y;
+                    bullets1[i].isactive = true;
+                    
+                    bullets1[i].x = p1x;
+                    bullets1[i].y = p1y;
                 
-                bullets1[i].dx = 1.0 * -sin(p1r);
-                bullets1[i].dy = 1.0 * cos(p1r);
+                    bullets1[i].dx = 1.0 * -sin(p1r);
+                    bullets1[i].dy = 1.0 * cos(p1r);
                 
-                break;
+                    firetime1 = 1;
+                
+                    break;
+                }
             }
-            
         }
-        
     }
     
     for(int i = 0; i < 5; i++){
@@ -271,7 +280,8 @@ void doPhysics(){
         }
         
     }
-    
+    if(firetime1 != 0) firetime1++;
+    if(firetime2 != 0) firetime2++;
 }
 
 int main(int argc, char** argv)
@@ -317,11 +327,10 @@ int main(int argc, char** argv)
     
     GLuint imgLoc = glGetUniformLocation(entityShader.getID(),"tex");
     GLuint colorLoc = glGetUniformLocation(entityShader.getID(),"color");
-    GLuint motionLoc = glGetUniformLocation(entityShader.getID(),"motion");
+    GLuint glowColorLoc = glGetUniformLocation(entityShader.getID(),"glowColor");
     
     GLuint rpColorLoc = glGetUniformLocation(postShader.getID(),"rpColor");
     GLuint rpBlurLoc = glGetUniformLocation(postShader.getID(),"rpBlur");
-    GLuint rpMotionLoc = glGetUniformLocation(postShader.getID(),"rpMotion");
     
     RenderPass rp = RenderPass();
     rp.setup(2, 640, 480, false);
@@ -336,9 +345,15 @@ int main(int argc, char** argv)
     Gaussian gauss = Gaussian(640,480);
     
     std::cout << "end" << std::endl;
+
+    int ms;
+    
+    std::clock_t start;
     
     while (!quit) {
-
+        
+        start = std::clock();
+        
         while (SDL_PollEvent(&event)) {
 
             switch (event.type) {
@@ -387,9 +402,10 @@ int main(int argc, char** argv)
 
         glUniformMatrix4fv(transformLoc,1,GL_FALSE,&transform1[0][0]);
         
-        glUniform3f(colorLoc, 0.0f, 0.0f, 1.0f);
+        glUniform3f(colorLoc, 0.7f, 0.7f, 1.0f);
+        glUniform3f(glowColorLoc, 0.0f, 0.0f, 1.0f);
         
-        glUniform2f(motionLoc, p1vx, p1vy);
+        //glUniform2f(motionLoc, p1vx, p1vy);
         
         mesh.draw();
 
@@ -402,13 +418,15 @@ int main(int argc, char** argv)
         
         glUniformMatrix4fv(transformLoc,1,GL_FALSE,&transform2[0][0]);
         
-        glUniform3f(colorLoc, 1.0f, 0.0f, 0.0f);
+        glUniform3f(colorLoc, 1.0f, 0.7f, 0.7f);
+        glUniform3f(glowColorLoc, 1.0f, 0.0f, 0.0f);
         
-        glUniform2f(motionLoc, p2vx, p2vy);
+        //glUniform2f(motionLoc, p2vx, p2vy);
         
         mesh.draw();
         
-        glUniform3f(colorLoc, 0.0f, 0.0f, 1.0f);
+        glUniform3f(colorLoc, 0.7f, 0.7f, 1.0f);
+        glUniform3f(glowColorLoc, 0.0f, 0.0f, 1.0f);
         
         circle_tex.bind();
         
@@ -419,7 +437,7 @@ int main(int argc, char** argv)
                 
                 glUniformMatrix4fv(transformLoc,1,GL_FALSE,&bulletTransform[0][0]);
                 
-                glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
+                //glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
                 
                 mesh.draw();
                 
@@ -437,7 +455,7 @@ int main(int argc, char** argv)
         
         gauss.begin();
 
-        glBindTexture(GL_TEXTURE_2D, rp.textures[0]);
+        glBindTexture(GL_TEXTURE_2D, rp.textures[1]);
         
         //mesh.draw();
         rp.draw();
@@ -454,15 +472,12 @@ int main(int argc, char** argv)
         //gauss.begin();
         glUniform1i(rpColorLoc,0);
         glUniform1i(rpBlurLoc,1);
-        glUniform1i(rpMotionLoc,2);
         
         glActiveTexture(GL_TEXTURE0);
         glBindTexture(GL_TEXTURE_2D, rp.textures[0]);
         glActiveTexture(GL_TEXTURE1);
         glBindTexture(GL_TEXTURE_2D, gauss.getTexture());
         //glBindTexture(GL_TEXTURE_2D, 6);
-        glActiveTexture(GL_TEXTURE2);
-        glBindTexture(GL_TEXTURE_2D, rp.textures[1]);
         
         //mesh.draw();
         
@@ -473,8 +488,8 @@ int main(int argc, char** argv)
         //gauss.end();
 
         Util::updateWindow();
-
-        SDL_Delay(33);
+        ms = (std::clock() - start) / (double) (CLOCKS_PER_SEC / 1000);
+        SDL_Delay(33 - ms);
     }
 
     glDeleteBuffers(1, &FBO);

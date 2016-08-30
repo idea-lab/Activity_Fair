@@ -19,7 +19,7 @@ texture.o: texture.cpp texture.h
 gaussian.o: gaussian.cpp gaussian.h
 	g++ -c $(CPPFLAGS) $(INCS) gaussian.cpp -o gaussian.o
 clean:
-	rm -f main.o shader.o mesh.o renderpass.o util.o sdlgame *~
+	rm -f main.o shader.o mesh.o renderpass.o util.o texture.o gaussian.o sdlgame *~
 .PHONY: clean
 
 devtest:
