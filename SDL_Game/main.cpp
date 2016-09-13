@@ -210,6 +210,31 @@ void doPhysics(){
                     break;
                 }
             }
+<<<<<<< HEAD
+=======
+        }
+    }
+    
+    if(keystate[SDL_GetScancodeFromKey(SDLK_s)]){
+        if(firetime2 > 10 || firetime2 == 0){
+            for(int i = 0; i < 5; i++){
+            
+                if(!bullets2[i].isactive){
+                //std::cout <<"mepp" <<std::endl;
+                    bullets2[i].isactive = true;
+                    
+                    bullets2[i].x = p2x;
+                    bullets2[i].y = p2y;
+                
+                    bullets2[i].dx = 1.0 * -sin(p2r);
+                    bullets2[i].dy = 1.0 * cos(p2r);
+                
+                    firetime2 = 1;
+                
+                    break;
+                }
+            }
+>>>>>>> f699bebd8ee0e702e7b7928791699631870fbc2c
         }
     }
     
@@ -255,7 +280,7 @@ void doPhysics(){
             bullets2[i].y += bullets2[i].dy;
         
         
-            if(bullets2[i].x <50.0f ||bullets2[i].x >50.0f ||bullets2[i].y <50.0f ||bullets2[i].y >50.0f){
+            if(bullets2[i].x < -25.0f ||bullets2[i].x > 25.0f ||bullets2[i].y < -25.0f ||bullets2[i].y > 25.0f){
             
                 bullets2[i].x = 0;
                 bullets2[i].y = 0;
@@ -438,6 +463,29 @@ int main(int argc, char** argv)
                 glUniformMatrix4fv(transformLoc,1,GL_FALSE,&bulletTransform[0][0]);
                 
                 //glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
+<<<<<<< HEAD
+=======
+                
+                mesh.draw();
+                
+            }
+            
+        }
+        
+        glUniform3f(colorLoc, 1.0f, 0.7f, 0.7f);
+        glUniform3f(glowColorLoc, 1.0f, 0.0f, 0.0f);
+        
+        circle_tex.bind();
+        
+        for(int i = 0; i < 5; i++){
+            if(bullets2[i].isactive){
+                
+                bulletTransform = glm::translate(glm::vec3(bullets2[i].x,bullets2[i].y,0.0f));
+                
+                glUniformMatrix4fv(transformLoc,1,GL_FALSE,&bulletTransform[0][0]);
+                
+                //glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
+>>>>>>> f699bebd8ee0e702e7b7928791699631870fbc2c
                 
                 mesh.draw();
                 
