@@ -1,0 +1,23 @@
+@font-face{
+  font-family: Roboto;
+  src: url(./Roboto-Regular.ttf);
+}
+
+.flexdiv{
+        display: flex;
+        justify-content: space-around;
+}
+
+body{
+  font-family: Roboto;
+}
+
+#display{
+  border: 1px solid #000000;
+  padding: 5px;
+}
+
+#footer ul{
+  list-style-type: none;
+}
+

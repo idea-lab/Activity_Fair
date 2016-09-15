@@ -1,0 +1,4 @@
+<world>
+  <model path="./src/models/dead_tree.json" x="-22.613" y="-12.563" z="48.334" scale="1.0"/>
+  <model path="./src/models/mountains.json" x="0.0" y="0.0" z="0.0" scale="100.0"/>
+</world>
