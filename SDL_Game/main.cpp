@@ -27,6 +27,8 @@
 SDL_Event event;
 
 
+
+
 GLfloat vertPositions[] = {
 
     -1.0,-1.0,-1.0,
@@ -49,7 +51,27 @@ GLfloat vertPositions[] = {
 
 };
 
+GLfloat healthBarPositions[] = {
 
+    0.0,-1.0,-1.0,
+    0.0,0.0,
+
+    1.0,-1.0,-1.0,
+    1.0,0.0,
+
+    1.0,1.0,-1.0,
+    1.0,1.0,
+
+    1.0,1.0,-1.0,
+    1.0,1.0,
+
+    0.0,1.0,-1.0,
+    0.0,1.0,
+
+    0.0,-1.0,-1.0,
+    0.0,0.0
+
+};
 
 GLuint ctex;
 GLuint ntex;
@@ -57,8 +79,11 @@ GLuint ntex;
 GLuint FBO;
 GLuint FBOTex;
 
-const int width = 640;
-const int height = 480;
+glm::mat4 redHealthTrans;
+glm::mat4 blueHealthTrans;
+
+const float width = 1280;
+const float height = 720;
 
 float p1x; //position x
 float p1y; //position y
@@ -66,7 +91,7 @@ float p1y; //position y
 float p1vx; //velocity x
 float p1vy; //velocity y
 
-const float p1a = 0.05f; //acceleration constant
+const float p1a = 0.02f; //acceleration constant
 const float p1d = 0.97f; //deceleration constant (multiplicative)
 
 float p1r; //rotation 0 to 2pi
@@ -80,9 +105,11 @@ float p2vy;
 int firetime1;
 int firetime2;
 
-const float p2a = 0.05f; 
+const float p2a = 0.02f; 
 const float p2d = 0.97f;
 
+int p1health;
+int p2health;
 
 
 float p2r;
@@ -106,6 +133,15 @@ struct bullet bullets1[5];
 struct bullet bullets2[5];
 
 
+float distance(float x1, float y1, float x2, float y2){
+    
+    float a = x2-x1;
+    float b = y2-y1;
+    //std::cout <<sqrt(a*a + b*b) << std::endl;
+    return sqrt(a*a + b*b);
+    
+}
+
 void doPhysics(){
     
     if(keystate[SDL_GetScancodeFromKey(SDLK_UP)]){
@@ -122,7 +158,7 @@ void doPhysics(){
 
     if(keystate[SDL_GetScancodeFromKey(SDLK_LEFT)]){
         
-        p1r += 0.25;
+        p1r += 0.15;
         
         if(p1r >= TWOPI){
             p1r -= TWOPI;
@@ -135,7 +171,7 @@ void doPhysics(){
 
     if(keystate[SDL_GetScancodeFromKey(SDLK_RIGHT)]){
         
-        p1r -= 0.25;
+        p1r -= 0.15;
         
         if(p1r >= TWOPI){
             p1r -= TWOPI;
@@ -148,6 +184,23 @@ void doPhysics(){
 
     p1x += p1vx;
     p1y += p1vy;
+    
+    if(p1x < -25.0f){
+        p1x = -25.0f;
+        p1vx *= -1;
+    }
+    if(p1x > 25.0f){
+        p1x = 25.0f;
+        p1vx *= -1;
+    }
+    if(p1y < -15.0f){
+        p1y = -15.0f;
+        p1vy *= -1;
+    }
+    if(p1y > 15.0f){
+        p1y = 15.0f;
+        p1vy *= -1;
+    }
     
     if(keystate[SDL_GetScancodeFromKey(SDLK_w)]){
         
@@ -163,7 +216,7 @@ void doPhysics(){
 
     if(keystate[SDL_GetScancodeFromKey(SDLK_a)]){
         
-        p2r += 0.25;
+        p2r += 0.15;
         
         if(p2r >= TWOPI){
             p2r -= TWOPI;
@@ -176,7 +229,7 @@ void doPhysics(){
     
     if(keystate[SDL_GetScancodeFromKey(SDLK_d)]){
         
-        p2r -= 0.25;
+        p2r -= 0.15;
         
         if(p2r >= TWOPI){
             p2r -= TWOPI;
@@ -190,6 +243,22 @@ void doPhysics(){
     p2x += p2vx;
     p2y += p2vy;
     
+    if(p2x < -25.0f){
+        p2x = -25.0f;
+        p2vx *= -1;
+    }
+    if(p2x > 25.0f){
+        p2x = 25.0f;
+        p2vx *= -1;
+    }
+    if(p2y > 15.0f){
+        p2y = 15.0f;
+        p2vy *= -1;
+    }
+    if(p2y < -15.0f){
+        p2y = -15.0f;
+        p2vy *= -1;
+    }
     
     if(keystate[SDL_GetScancodeFromKey(SDLK_DOWN)]){
         if(firetime1 > 10 || firetime1 == 0){
@@ -210,8 +279,7 @@ void doPhysics(){
                     break;
                 }
             }
-<<<<<<< HEAD
-=======
+
         }
     }
     
@@ -234,7 +302,7 @@ void doPhysics(){
                     break;
                 }
             }
->>>>>>> f699bebd8ee0e702e7b7928791699631870fbc2c
+
         }
     }
     
@@ -256,7 +324,9 @@ void doPhysics(){
             
             }
         
-            if(abs(p2x - bullets1[i].x) < 1.0f && abs(p2y - bullets1[i].y) < 1.0){
+            //if(abs(p2x - bullets1[i].x) < 1.0f && abs(p2y - bullets1[i].y) < 1.0){
+            
+            if(distance(bullets1[i].x, bullets1[i].y, p2x, p2y) <= 1.8f){
             
                 //HIT
             
@@ -265,7 +335,17 @@ void doPhysics(){
                 bullets1[i].dx = 0;
                 bullets1[i].dy = 0;
                 bullets1[i].isactive = false;
-            
+                if(p2health == 1){
+                p2x = -10;
+                p2y = 0;
+                p2vx = 0;
+                p2vy = 0;
+                p2r = 3*TWOPI/4.0f;
+                p2health = 25;
+                }else{
+                    p2health -= 1;
+                }
+                redHealthTrans = glm::scale(glm::rotate(glm::translate(glm::vec3(0.0f,13.0f,0.0f)),3.14f,glm::vec3(0.0f,0.0f, 1.0f)),glm::vec3(p2health,1.0f,1.0f));
             }
             
         }
@@ -290,8 +370,8 @@ void doPhysics(){
             
             }
         
-            if(abs(p1x - bullets2[i].x) < 1.0f && abs(p1y - bullets2[i].y) < 1.0){
-            
+           // if(abs(p1x - bullets2[i].x) < 1.0f && abs(p1y - bullets2[i].y) < 1.0){
+             if(distance(bullets2[i].x, bullets2[i].y, p1x, p1y) <= 1.8f){
                 //HIT
             
                 bullets2[i].x = 0;
@@ -299,7 +379,17 @@ void doPhysics(){
                 bullets2[i].dx = 0;
                 bullets2[i].dy = 0;
                 bullets2[i].isactive = false;
-            
+                if(p1health == 1){
+                p1x = 10;
+                p1y = 0;
+                p1vx = 0;
+                p1vy = 0;
+                p1r = TWOPI/4.0f;
+                p1health = 25;
+                }else{
+                    p1health -= 1;
+                }
+                blueHealthTrans = glm::scale(glm::rotate(glm::translate(glm::vec3(0.0f,13.0f,0.0f)),0.0f,glm::vec3(0.0f,0.0f, 1.0f)),glm::vec3(p1health,1.0f,1.0f));
             }
             
         }
@@ -312,7 +402,9 @@ void doPhysics(){
 int main(int argc, char** argv)
 {
 
-
+    p1health = 25;
+    p2health = 25;
+    
     Util::setup(width, height);
 
     
@@ -324,11 +416,14 @@ int main(int argc, char** argv)
     mesh.setVerts(vertPositions, sizeof(vertPositions) / sizeof(GLfloat));
     //Mesh p2 = Mesh(vertPositions);
 
+    Mesh healthBar = Mesh();
+    healthBar.setVerts(healthBarPositions, sizeof(vertPositions) / sizeof(GLfloat));
+    
     Shader entityShader = Shader("shaders/entity");
     Shader postShader = Shader("shaders/post");
 
 
-    glm::mat4 projection = glm::ortho(-25.0f, 25.0f, -25.0f*(480.0f/640.0f), 25.0f*(480.0f/640.0f), 0.0f, 1.0f);
+    glm::mat4 projection = glm::ortho(-25.0f, 25.0f, -25.0f*(height/width), 25.0f*(height/width), 0.0f, 1.0f);
     glm::mat4 vp = projection;
     
     glm::mat4 transform1 = glm::translate(glm::vec3(0.0f,0.0f,0.0f)) * glm::rotate(p1r,glm::vec3(p1x,p1y, 0.0f));
@@ -340,6 +435,9 @@ int main(int argc, char** argv)
     GLuint vpLoc = glGetUniformLocation(entityShader.getID(), "vp");
     GLuint transformLoc = glGetUniformLocation(entityShader.getID(), "transform");
 
+    redHealthTrans = glm::scale(glm::rotate(glm::translate(glm::vec3(0.0f,13.0f,0.0f)),3.14f,glm::vec3(0.0f,0.0f, 1.0f)),glm::vec3(25.0f,1.0f,1.0f));
+    
+    blueHealthTrans = glm::scale(glm::rotate(glm::translate(glm::vec3(0.0f,13.0f,0.0f)),0.0f,glm::vec3(0.0f,0.0f, 1.0f)),glm::vec3(25.0f,1.0f,1.0f));
 
     glEnable(GL_TEXTURE_2D);
     //glEnable(GL_DEPTH_TEST);
@@ -347,8 +445,9 @@ int main(int argc, char** argv)
     //glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
     glBlendFunc(GL_SRC_ALPHA,GL_ONE);
     
-    Texture triangle_tex = Texture("res/img/triangle_sprite.png");
+    Texture triangle_tex = Texture("res/img/ship_sprite.png");
     Texture circle_tex = Texture("res/img/circle_sprite.png");
+    Texture square_tex = Texture("res/img/square.png");
     
     GLuint imgLoc = glGetUniformLocation(entityShader.getID(),"tex");
     GLuint colorLoc = glGetUniformLocation(entityShader.getID(),"color");
@@ -358,7 +457,7 @@ int main(int argc, char** argv)
     GLuint rpBlurLoc = glGetUniformLocation(postShader.getID(),"rpBlur");
     
     RenderPass rp = RenderPass();
-    rp.setup(2, 640, 480, false);
+    rp.setup(2, width, height, false);
     //rp.setup(2, 320, 240);
     bool quit = false;
     double phase = 0.00;
@@ -367,7 +466,7 @@ int main(int argc, char** argv)
 
     std::cout << "begin" << std::endl;
     
-    Gaussian gauss = Gaussian(640,480);
+    Gaussian gauss = Gaussian(width,height);
     
     std::cout << "end" << std::endl;
 
@@ -463,8 +562,7 @@ int main(int argc, char** argv)
                 glUniformMatrix4fv(transformLoc,1,GL_FALSE,&bulletTransform[0][0]);
                 
                 //glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
-<<<<<<< HEAD
-=======
+
                 
                 mesh.draw();
                 
@@ -485,13 +583,28 @@ int main(int argc, char** argv)
                 glUniformMatrix4fv(transformLoc,1,GL_FALSE,&bulletTransform[0][0]);
                 
                 //glUniform2f(motionLoc, bullets1[i].dx,bullets1[i].dy);
->>>>>>> f699bebd8ee0e702e7b7928791699631870fbc2c
-                
+
                 mesh.draw();
                 
             }
             
         }
+        
+        square_tex.bind();
+        
+        glUniform3f(colorLoc, 1.0f, 0.7f, 0.7f);
+        glUniform3f(glowColorLoc, 1.0f, 0.0f, 0.0f);
+        
+        glUniformMatrix4fv(transformLoc,1,GL_FALSE,&redHealthTrans[0][0]);
+                
+        healthBar.draw();
+        
+        glUniform3f(colorLoc, 0.7f, 0.7f, 1.0f);
+        glUniform3f(glowColorLoc, 0.0f, 0.0f, 1.0f);
+        
+        glUniformMatrix4fv(transformLoc,1,GL_FALSE,&blueHealthTrans[0][0]);
+                
+        healthBar.draw();
         
         entityShader.unbind();
         
@@ -509,11 +622,11 @@ int main(int argc, char** argv)
         rp.draw();
         
         gauss.end();
-
+        
         glClear(GL_COLOR_BUFFER_BIT);
         
         ////////
-        glViewport(0,0,640,480);
+        glViewport(0,0,width,height);
         postShader.bind();
         //gauss.begin();
         

@@ -47,6 +47,10 @@ void Gaussian::end(){
     vShader.unbind();
 
     pass2.end();
+    
+    
+    
+   
 }
 
 GLuint Gaussian::getTexture(){
@@ -57,9 +61,9 @@ GLuint Gaussian::getTexture(){
 
 void Gaussian::setup(int width, int height){
     std::cout << "pass1" << std::endl;
-    pass1.setup(1,width/2,height/2, true); //DOWNSCALE FOR BETTER PERFORMANCE & MORE BLUR
+    pass1.setup(1,width/2.0f,height/2.0f, true); //DOWNSCALE FOR BETTER PERFORMANCE & MORE BLUR
     std::cout << "pass2" << std::endl;
-    pass2.setup(1,width/2,height/2, true); //DOWNSCALE FOR BETTER PERFORMANCE & MORE BLUR
+    pass2.setup(1,width/2.0f,height/2.0f, true); //DOWNSCALE FOR BETTER PERFORMANCE & MORE BLUR
     
     
     hShader = Shader("shaders/hgauss");

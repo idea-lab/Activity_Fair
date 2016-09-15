@@ -5,7 +5,7 @@ attribute vec2 uv;
 
 varying vec2 uvs[15];
 
-const float pixelSize = 1.0/160.0;
+const float pixelSize = 1.0/320.0;
 
 
 void main(){

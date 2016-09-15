@@ -1,5 +1,5 @@
 #-*-sh-*-
-CPPFLAGS=-g -W -Wall -Wextra
+CPPFLAGS=-g -w #-Wall -Wextra
 LIBS = -lSDL2 -lSDL2_image -lGL -lGLEW
 INCS = # -I/usr/include/SDL2
 sdltest: main.o shader.o mesh.o renderpass.o util.o texture.o gaussian.o
